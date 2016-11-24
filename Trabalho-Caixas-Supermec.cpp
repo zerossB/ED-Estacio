@@ -11,14 +11,13 @@
 
 using namespace std;
 
-/* ========================================================================= */
-/* =                                                                       = */
-/* =                           Estruturas bases                            = */
-/* =                                                                       = */
-/* ========================================================================= */
+/* ========================================================================== */
+/* =                                                                        = */
+/* =                            Estruturas bases                            = */
+/* =                                                                        = */
+/* ========================================================================== */
 
-
-/* ========================== Estruturas da Pilha ========================== */
+/* ========================== Estruturas da Fila ============================ */
 
 /**
  *  Estrutura do cliente
@@ -32,19 +31,17 @@ typedef struct cliente {
  * Estrutura de fila, para poder listar todos os clientes
  *      do caixa aberto
  */
-typedef struct tipo_fila {
+typedef struct no_fila {
     tCliente dado;
-    struct tipo_fila *prox;
+    struct no_fila *prox;
+} tTNo;
+
+typedef struct tipo_fila{
+    tTNo *inicio;
+    tTNo *fim;
 } tTFila;
 
-//Primeiro Cliente
-struct tipo_fila *fFirst;
-
-//Ultimo Cliente
-struct tipo_fila *fLast;
-
-
-/* ========================== Estruturas da Lista ========================== */
+/* ========================== Estruturas da Lista =========================== */
 
 /*
  *  Estrutura de um caixa do supermercado
@@ -52,7 +49,7 @@ struct tipo_fila *fLast;
 typedef struct caixa {
     int numCaixa;
     int tmpMedio;
-    tTFila fila;
+    tTFila *fila;
 } tCaixa;
 
 /*
@@ -72,43 +69,78 @@ struct lista_caixa *lLast;
 int tmpMedioCaixa;
 
 
-/* ========================================================================= */
-/* =                                                                       = */
-/* =                        Estruturas das funções                         = */
-/* =                                                                       = */
-/* ========================================================================= */
+/* ========================================================================== */
+/* =                                                                        = */
+/* =                         Estruturas das funções                         = */
+/* =                                                                        = */
+/* ========================================================================== */
 
-/* ====================== Funções da Lista de caixas ======================= */
+/* ======================= Funções da Lista de caixas ======================= */
 void criaLista();
 void showLista();
-void insertLista(int);
+void insertLista(int, tTFila);
 void deleteLista(int);
 int tamanhoLista();
 bool vaziaLista();
+tCaixa * getCaixa(int);
 
-/* ====================== Funções da Pilha de Clientes ===================== */
-void criaFila();
-void showFila();
-void insertFila(int);
-void deleteFila();
-int tamanhoFila();
-bool vaziaFila();
+/* ====================== Funções da Fila de Clientes ======================= */
+void criaFila(tTFila *);
+void showFila(tTFila *);
+void insertFila(int, tTFila *);
+void deleteFila(tTFila *);
+int tamanhoFila(tTFila *);
+bool vaziaFila(tTFila *);
+
+/* ======================== Funções do Supermercado ========================= */
+void definirTempoMedio();
+void criaCliente();
+void atendeCliente();
+void showStatus();
 
 /*
  * Metodo Main
  */
 int main(int argc, char** argv) {
-    
+    int opt;
 
+    definirTempoMedio();
+    criaLista();
+    system("clear");
+    
+    do{
+        cout << "========== Menu do Supermercado ==========" << endl;
+        cout << "|                                        |" << endl;
+        cout << "|    1- Criar Cliente                    |" <<endl;
+        cout << "|    2- Atender Cliente                  |" <<endl;
+        cout << "|    3- Listar Caixas                    |" <<endl;
+        cout << "|                                        |" << endl;
+        cout << "==========================================\n" <<endl;
+        cout << "Escolha sua opção: ";
+        cin >> opt;
+        
+        switch(opt){
+            case 1:
+                criaCliente();
+                system("clear");
+                break;
+            case 2:
+                system("clear");
+                break;
+            case 3:
+                system("clear");
+                break;
+        }
+    }while(opt != 0);
+    
     return 0;
 }
 
-/* ========================================================================= */
-/* =                                                                       = */
-/* =                 Funções para manipulações da Lista                    = */
-/* =                                                                       = */
-
-/* ========================================================================= */
+/* ========================================================================== */
+/* =                                                                        = */
+/* =                   Funções para manipulações da Lista                   = */
+/* =                                                                        = */
+/* ========================================================================== */
 
 void criaLista() {
     tLCaixas *aux;
@@ -117,13 +149,14 @@ void criaLista() {
     lLast = lFirst;
 }
 
-void insertLista(int tmpMedio) {
+void insertLista(int tmpMedio, tTFila *inicio) {
     tCaixa dado;
     tLCaixas *aux;
     aux = (tLCaixas *) malloc(sizeof (tLCaixas));
 
     dado.numCaixa = lLast->dado.numCaixa + 1;
     dado.tmpMedio = tmpMedio;
+    dado.fila = inicio;
 
     aux->dado = dado;
     lLast->prox = aux;
@@ -180,23 +213,35 @@ bool vaziaLista() {
     return (lFirst->prox == NULL) ? true : false;
 }
 
-/* ========================================================================= */
-/* =                                                                       = */
-/* =                  Funções para manipulações da Fila                    = */
-/* =                                                                       = */
-/* ========================================================================= */
-
-void criaFila() {
-    tTFila *aux;
-    aux = (tTFila *) malloc(sizeof (tTFila));
-    fFirst = aux;
-    fLast = fFirst;
+tCaixa * getCaixa(int codCaixa){
+    tLCaixas *aux;
+    aux = lFirst->prox;
+    while (aux != NULL) {
+        if(aux->dado.numCaixa == codCaixa){
+            return &aux->dado;
+            break;
+        }
+        aux = aux->prox;
+    }
 }
 
-void showFila() {
-    tTFila *aux;
-    aux = fFirst->prox;
-    while (aux != fFirst) {
+/* ========================================================================== */
+/* =                                                                        = */
+/* =                   Funções para manipulações da Fila                    = */
+/* =                                                                        = */
+/* ========================================================================== */
+
+void criaFila(tTFila *fila) {
+    tTNo *aux;
+    aux = (tTNo *) malloc(sizeof (tTNo));
+    fila->inicio = aux;
+    fila->fim = fila->inicio;
+}
+
+void showFila(tTFila *fila) {
+    tTNo *aux;
+    aux = fila->inicio->prox;
+    while (aux != fila->inicio) {
         cout << "\n";
         cout << "=====================================================" << endl;
         cout << "Cliente " << aux->dado.codClient << endl;
@@ -205,37 +250,80 @@ void showFila() {
     }
 }
 
-void insertFila(int tmpMedio) {
+void insertFila(int tmpMedio, tTFila *fila) {
     tCliente dado;
-    tTFila *aux;
-    aux = (tTFila *) malloc(sizeof (tTFila));
+    tTNo *aux;
+    aux = (tTNo *) malloc(sizeof (tTNo));
 
-    dado.codClient = fLast->dado.codClient + 1;
+    dado.codClient = fila->fim->dado.codClient + 1;
     dado.tempo = tmpMedio;
-    
+
     aux->dado = dado;
-    fLast->prox = aux;
-    fLast = fLast->prox;
-    aux->prox = fFirst;
+    fila->fim->prox = aux;
+    fila->fim = fila->fim->prox;
+    aux->prox = fila->fim;
 }
 
-void deleteFila() {
-    if(vaziaFila()) return;
-
-    fFirst->prox = fFirst->prox->prox;
+void deleteFila(tTFila *fila) {
+    if (vaziaFila(fila)) return;
+    fila->inicio->prox = fila->inicio->prox->prox;
 }
 
-int tamanhoFila() {
-    tTFila *aux;
+int tamanhoFila(tTFila *fila) {
+    tTNo *aux;
     int i = 0;
-    aux = fFirst->prox;
-    while (aux != NULL) {
+    aux = fila->inicio->prox;
+    while (aux != fila->inicio) {
         aux = aux->prox;
         i++;
     }
     return i;
 }
 
-bool vaziaFila() {
-    return (fFirst->prox == NULL) ? true : false;
+bool vaziaFila(tTFila *fila) {
+    return (fila->inicio->prox == fila->fim) ? true : false;
+}
+
+
+/* ========================================================================== */
+/* =                                                                        = */
+/* =                   Funções para manipulações Basicas                    = */
+/* =                                                                        = */
+/* ========================================================================== */
+
+void definirTempoMedio(){
+    cout << "Qual o tempo médio de cada caixa? ";
+    cin >> tmpMedioCaixa;
+}
+
+void criaCliente(){
+    int tmp, caixa;
+    
+    cout << "Qual caixa você deseja inserir? ";
+    cin >> caixa;
+    
+    cout << "Digite o tempo que esse cliente levará para ser atendido: ";
+    cin >> tmp;
+    
+    
+    
+}
+
+void atendeCliente(){
+    int caixa;
+    cout << "Qual caixa deseja eliminar o cliente? ";
+    cin >> caixa;
+    
+}
+
+void showStatus(){
+    tLCaixas *aux;
+    aux = lFirst->prox;
+    while (aux != NULL) {
+        cout << "\n";
+        cout << "=====================================================" << endl;
+        cout << "Numero do Caixa: " << aux->dado.numCaixa << endl;
+        cout << "Tempo médio para o caixa: " << aux->dado.tmpMedio << endl;
+        aux = aux->prox;
+    }
 }
