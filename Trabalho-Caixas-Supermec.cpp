@@ -36,9 +36,10 @@ typedef struct no_fila {
     struct no_fila *prox;
 } tTNo;
 
-typedef struct tipo_fila{
+typedef struct tipo_fila {
     tTNo *inicio;
     tTNo *fim;
+    int quantidade;
 } tTFila;
 
 /* ========================== Estruturas da Lista =========================== */
@@ -66,6 +67,8 @@ struct lista_caixa *lFirst;
 
 //Ultimo caixa aberto
 struct lista_caixa *lLast;
+
+
 int tmpMedioCaixa;
 
 
@@ -78,7 +81,7 @@ int tmpMedioCaixa;
 /* ======================= Funções da Lista de caixas ======================= */
 void criaLista();
 void showLista();
-void insertLista(int, tTFila);
+void insertLista(int, tTFila *);
 void deleteLista(int);
 int tamanhoLista();
 bool vaziaLista();
@@ -91,6 +94,7 @@ void insertFila(int, tTFila *);
 void deleteFila(tTFila *);
 int tamanhoFila(tTFila *);
 bool vaziaFila(tTFila *);
+int getTempoFila(tTFila *);
 
 /* ======================== Funções do Supermercado ========================= */
 void definirTempoMedio();
@@ -102,37 +106,20 @@ void showStatus();
  * Metodo Main
  */
 int main(int argc, char** argv) {
-    int opt;
-
-    definirTempoMedio();
     criaLista();
-    system("clear");
-    
-    do{
-        cout << "========== Menu do Supermercado ==========" << endl;
-        cout << "|                                        |" << endl;
-        cout << "|    1- Criar Cliente                    |" <<endl;
-        cout << "|    2- Atender Cliente                  |" <<endl;
-        cout << "|    3- Listar Caixas                    |" <<endl;
-        cout << "|                                        |" << endl;
-        cout << "==========================================\n" <<endl;
-        cout << "Escolha sua opção: ";
-        cin >> opt;
-        
-        switch(opt){
-            case 1:
-                criaCliente();
-                system("clear");
-                break;
-            case 2:
-                system("clear");
-                break;
-            case 3:
-                system("clear");
-                break;
-        }
-    }while(opt != 0);
-    
+    definirTempoMedio();
+
+    tTFila fila;
+    criaFila(&fila);
+
+    for (int i = 0; i < 10; i++) {
+        insertFila(1, &fila);
+    }
+
+    insertLista(tmpMedioCaixa, &fila);
+
+    showStatus();
+
     return 0;
 }
 
@@ -213,11 +200,11 @@ bool vaziaLista() {
     return (lFirst->prox == NULL) ? true : false;
 }
 
-tCaixa * getCaixa(int codCaixa){
+tCaixa * getCaixa(int codCaixa) {
     tLCaixas *aux;
     aux = lFirst->prox;
     while (aux != NULL) {
-        if(aux->dado.numCaixa == codCaixa){
+        if (aux->dado.numCaixa == codCaixa) {
             return &aux->dado;
             break;
         }
@@ -261,12 +248,14 @@ void insertFila(int tmpMedio, tTFila *fila) {
     aux->dado = dado;
     fila->fim->prox = aux;
     fila->fim = fila->fim->prox;
-    aux->prox = fila->fim;
+    fila->fim = aux;
+    fila->quantidade = fila->quantidade + 1;
 }
 
 void deleteFila(tTFila *fila) {
     if (vaziaFila(fila)) return;
     fila->inicio->prox = fila->inicio->prox->prox;
+    fila->quantidade = fila->quantidade - 1;
 }
 
 int tamanhoFila(tTFila *fila) {
@@ -281,7 +270,18 @@ int tamanhoFila(tTFila *fila) {
 }
 
 bool vaziaFila(tTFila *fila) {
-    return (fila->inicio->prox == fila->fim) ? true : false;
+    //return (fila->inicio->prox == fila->fim) ? true : false;
+    return (fila->inicio->prox == NULL) ? true : false;
+}
+
+int getTempoFila(tTFila *fila) {
+    tTNo *aux;
+    int i = 0;
+    aux = fila->inicio->prox;
+    while (aux != fila->inicio) {
+        aux = aux->prox;
+        i += aux->dado.tempo;
+    }
 }
 
 
@@ -291,32 +291,45 @@ bool vaziaFila(tTFila *fila) {
 /* =                                                                        = */
 /* ========================================================================== */
 
-void definirTempoMedio(){
+void definirTempoMedio() {
     cout << "Qual o tempo médio de cada caixa? ";
     cin >> tmpMedioCaixa;
 }
 
-void criaCliente(){
-    int tmp, caixa;
-    
-    cout << "Qual caixa você deseja inserir? ";
-    cin >> caixa;
-    
+void criaCliente() {
+    int tmp;
+    tLCaixas *aux;
+
     cout << "Digite o tempo que esse cliente levará para ser atendido: ";
     cin >> tmp;
-    
-    
-    
+
+    aux = lFirst->prox;
+    while (aux != NULL) {
+        //For menor igual o tempo médio |E| tmp for menor igual a diferença entre os 2
+        if (aux->dado.tmpMedio < tmpMedioCaixa && tmp <= (aux->dado.tmpMedio - tmpMedioCaixa)) {
+            //insertLista();
+            break;
+        } else if (aux->dado.tmpMedio >= tmpMedioCaixa) {
+            //criaFila();
+            //insertFila();
+            //insertLista();
+            break;
+        }
+        aux = aux->prox;
+    }
+
 }
 
-void atendeCliente(){
+void atendeCliente() {
     int caixa;
+    tCaixa *cax;
+
     cout << "Qual caixa deseja eliminar o cliente? ";
     cin >> caixa;
-    
+
 }
 
-void showStatus(){
+void showStatus() {
     tLCaixas *aux;
     aux = lFirst->prox;
     while (aux != NULL) {
@@ -324,6 +337,7 @@ void showStatus(){
         cout << "=====================================================" << endl;
         cout << "Numero do Caixa: " << aux->dado.numCaixa << endl;
         cout << "Tempo médio para o caixa: " << aux->dado.tmpMedio << endl;
+        showFila(aux->dado.fila);
         aux = aux->prox;
     }
 }
