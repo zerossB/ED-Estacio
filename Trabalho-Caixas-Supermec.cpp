@@ -3,6 +3,27 @@
  * Author: haynes
  *
  * Created on 14 de Novembro de 2016, 20:40
+ * 
+ * =============================================================================
+ *  Programa:
+ *  Faça um programa que simule o comportamento de Filas de supermercado.
+ * =============================================================================
+ * 
+ *  - O usuário que controla o programa será responsável por:
+ *      # Informar quando um novo cliente chega para ser atendido no caixa,
+ *          indicando o tempo estimado deste cliente.
+ *      # Indicar o tempo máximo de atendimento permitido numa Fila
+ *          (este tempo valerá para todas as filas em questão).
+ * 
+ *  - O sistema deve encaminhar o cliente para a Fila com menor tempo médio de atendimento.
+ *      # Ao encaminhar o cliente para uma Fila o sistema deve verificar se o tempo máximo
+ *          de atendimento da mesma não ultrapassará o limite permitido
+ *          (informado pelo operador do sistema). Em caso positivo, o cliente deve ser
+ *          encaminhado para outra Fila. Se o tempo máximo para todas as filas violar
+ *          o limite permitido ao tentar inserir um novo cliente para ser atendido então
+ *          o sistema deve solicitar a abertura de um novo “caixa” e encaminhar o cliente a ele.
+ *  
+ *  - Quando a Fila de um caixa estiver vazia você deve fechar este caixa.
  */
 
 #include <stdlib.h>
