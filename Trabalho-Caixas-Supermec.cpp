@@ -107,6 +107,7 @@ void deleteLista(int);
 int tamanhoLista();
 bool vaziaLista();
 tCaixa * getCaixa(int);
+void calcTmpMedio(tCaixa *);
 
 /* ====================== Funções da Fila de Clientes ======================= */
 void criaFila(tTFila *);
@@ -140,7 +141,7 @@ int main(int argc, char** argv) {
     insertLista(tmpMedioCaixa, &fila);
 
     showStatus();
-
+    
     return 0;
 }
 
@@ -165,6 +166,8 @@ void insertLista(int tmpMedio, tTFila *inicio) {
     dado.numCaixa = lLast->dado.numCaixa + 1;
     dado.tmpMedio = tmpMedio;
     dado.fila = inicio;
+
+    dado.tmpMedio = 0;
 
     aux->dado = dado;
     lLast->prox = aux;
@@ -231,6 +234,17 @@ tCaixa * getCaixa(int codCaixa) {
         }
         aux = aux->prox;
     }
+}
+
+void calcTmpMedio(tCaixa *caixa){
+    tTNo *aux;
+    int tmp = 0;
+    aux = caixa->fila->inicio->prox;
+    while (aux != caixa->fila->inicio) {
+        tmp += aux->dado.tempo;
+        aux = aux->prox;
+    }
+    cout << "Tempo médio: " << tmp << endl;
 }
 
 /* ========================================================================== */
@@ -326,17 +340,6 @@ void criaCliente() {
 
     aux = lFirst->prox;
     while (aux != NULL) {
-        //For menor igual o tempo médio |E| tmp for menor igual a diferença entre os 2
-        if (aux->dado.tmpMedio < tmpMedioCaixa && tmp <= (aux->dado.tmpMedio - tmpMedioCaixa)) {
-            //insertLista();
-            break;
-        } else if (aux->dado.tmpMedio >= tmpMedioCaixa) {
-            //criaFila();
-            //insertFila();
-            //insertLista();
-            break;
-        }
-        aux = aux->prox;
     }
 
 }
@@ -347,7 +350,6 @@ void atendeCliente() {
 
     cout << "Qual caixa deseja eliminar o cliente? ";
     cin >> caixa;
-
 }
 
 void showStatus() {
