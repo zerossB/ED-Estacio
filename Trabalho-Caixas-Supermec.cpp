@@ -130,17 +130,8 @@ void showStatus();
 int main(int argc, char** argv) {
     criaLista();
     definirTempoMedio();
-
-    tTFila fila;
-    criaFila(&fila);
-
-    for (int i = 0; i < 10; i++) {
-        insertFila(1, &fila);
-    }
-
-    insertLista(tmpMedioCaixa, &fila);
-
-    showStatus();
+    
+    
     
     return 0;
 }
@@ -149,6 +140,7 @@ int main(int argc, char** argv) {
 /* =                                                                        = */
 /* =                   Funções para manipulações da Lista                   = */
 /* =                                                                        = */
+
 /* ========================================================================== */
 
 void criaLista() {
@@ -166,13 +158,13 @@ void insertLista(int tmpMedio, tTFila *inicio) {
     dado.numCaixa = lLast->dado.numCaixa + 1;
     dado.tmpMedio = tmpMedio;
     dado.fila = inicio;
-
     dado.tmpMedio = 0;
 
     aux->dado = dado;
-    lLast->prox = aux;
-    lLast = lLast->prox;
     aux->prox = NULL;
+
+    lLast->prox = aux;
+    lLast = aux;
 }
 
 void deleteLista(int codCaixa) {
@@ -236,21 +228,22 @@ tCaixa * getCaixa(int codCaixa) {
     }
 }
 
-void calcTmpMedio(tCaixa *caixa){
+void calcTmpMedio(tCaixa *caixa) {
     tTNo *aux;
     int tmp = 0;
     aux = caixa->fila->inicio->prox;
-    while (aux != caixa->fila->inicio) {
+    while (aux->prox != NULL) {
         tmp += aux->dado.tempo;
         aux = aux->prox;
     }
-    cout << "Tempo médio: " << tmp << endl;
+    caixa->tmpMedio = tmp;
 }
 
 /* ========================================================================== */
 /* =                                                                        = */
 /* =                   Funções para manipulações da Fila                    = */
 /* =                                                                        = */
+
 /* ========================================================================== */
 
 void criaFila(tTFila *fila) {
@@ -258,6 +251,7 @@ void criaFila(tTFila *fila) {
     aux = (tTNo *) malloc(sizeof (tTNo));
     fila->inicio = aux;
     fila->fim = fila->inicio;
+    fila->quantidade = 0;
 }
 
 void showFila(tTFila *fila) {
@@ -281,6 +275,7 @@ void insertFila(int tmpMedio, tTFila *fila) {
     dado.tempo = tmpMedio;
 
     aux->dado = dado;
+    aux->prox = NULL;
     fila->fim->prox = aux;
     fila->fim = fila->fim->prox;
     fila->fim = aux;
@@ -324,6 +319,7 @@ int getTempoFila(tTFila *fila) {
 /* =                                                                        = */
 /* =                   Funções para manipulações Basicas                    = */
 /* =                                                                        = */
+
 /* ========================================================================== */
 
 void definirTempoMedio() {
@@ -337,11 +333,8 @@ void criaCliente() {
 
     cout << "Digite o tempo que esse cliente levará para ser atendido: ";
     cin >> tmp;
-
-    aux = lFirst->prox;
-    while (aux != NULL) {
-    }
-
+    
+    
 }
 
 void atendeCliente() {
@@ -355,7 +348,9 @@ void atendeCliente() {
 void showStatus() {
     tLCaixas *aux;
     aux = lFirst->prox;
+
     while (aux != NULL) {
+        cot++;
         cout << "\n";
         cout << "=====================================================" << endl;
         cout << "Numero do Caixa: " << aux->dado.numCaixa << endl;
